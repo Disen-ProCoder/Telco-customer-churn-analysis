@@ -1,0 +1,5 @@
+.ipynb_checkpoints/
+__pycache__/
+outputs/
+*.joblib
+.DS_Store

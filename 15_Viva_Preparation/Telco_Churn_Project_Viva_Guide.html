@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><title>Telco Customer Churn — Viva Preparation Guide</title>
+<style>
+@page { size: A4; margin: 15mm 14mm 16mm; }
+*{box-sizing:border-box} body{font-family:Arial,Helvetica,sans-serif;color:#182435;font-size:10.3pt;line-height:1.43;margin:0} h1{font-size:27pt;line-height:1.12;color:#073b5c;margin:0 0 8px} h2{font-size:18pt;color:#073b5c;border-bottom:2px solid #19a7a8;padding-bottom:4px;margin:24px 0 10px;break-after:avoid} h3{font-size:12.5pt;color:#0b6477;margin:16px 0 5px;break-after:avoid} h4{font-size:10.8pt;color:#073b5c;margin:10px 0 3px} p{margin:5px 0 9px} ul,ol{margin:5px 0 10px;padding-left:22px} li{margin:3px 0} table{width:100%;border-collapse:collapse;margin:8px 0 13px;font-size:9.2pt;break-inside:avoid} th{background:#073b5c;color:white;text-align:left} th,td{border:1px solid #b8cbd3;padding:6px;vertical-align:top} tr:nth-child(even){background:#f3f8fa}.cover{min-height:255mm;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#e9f8f7,#fff 55%);padding:24mm}.cover .tag{color:#087b7c;font-weight:bold;letter-spacing:1px;text-transform:uppercase}.cover .sub{font-size:15pt;color:#355466;max-width:580px}.cover .meta{margin-top:35px;border-left:5px solid #19a7a8;padding-left:15px}.box{background:#eef8f8;border-left:4px solid #19a7a8;padding:9px 12px;margin:9px 0 12px;break-inside:avoid}.warn{background:#fff7e7;border-left-color:#ed9b2e}.answer{background:#f0f6fb;border-left:4px solid #407aa1;padding:8px 11px;margin:6px 0 12px}.speak{background:#f5f2fb;border-left:4px solid #7757a8;padding:9px 12px;margin:8px 0 12px}.pill{display:inline-block;background:#d9f2ef;color:#07595c;border-radius:12px;padding:2px 8px;font-size:8.5pt;font-weight:bold}.pagebreak{break-before:page}.flow{display:flex;align-items:stretch;gap:4px;margin:10px 0 13px;break-inside:avoid}.flow div{flex:1;background:#eaf4f7;padding:8px 5px;text-align:center;border-radius:3px;font-size:8.6pt}.flow b{display:block;color:#073b5c}.flow i{align-self:center;font-style:normal;color:#19a7a8;font-size:16pt}.small{font-size:8.7pt;color:#516674}.toc li{margin:5px 0}.q{font-weight:bold;color:#073b5c;margin-top:13px}.footer-note{font-size:8.5pt;color:#516674}.avoid-break{break-inside:avoid}
+</style>
+</head>
+<body>
+<section class="cover">
+  <div class="tag">IT3091 • Group 2026-DS-87</div>
+  <h1>Telco Customer Churn<br>Project Viva Guide</h1>
+  <p class="sub">A plain-English, from-zero-to-confident guide to the project: what was built, why every choice was made, how it works, and how to answer an evaluator.</p>
+  <div class="meta"><b>Project:</b> Customer Retention Analysis<br><b>Dataset:</b> IBM Telco Customer Churn — 7,043 customers, 21 columns<br><b>Final model:</b> Logistic Regression (C = 4.5706)<br><b>Prepared from:</b> final report, final notebook, evaluation, profiling, and demo materials</div>
+  <p class="footer-note">Use this as a study guide. Learn the meaning, then speak naturally; do not memorise it word for word.</p>
+</section>
+
+<section class="pagebreak">
+<h2>How to use this guide</h2>
+<ol>
+<li>Read the <b>two-minute story</b> until you can explain the project without looking.</li>
+<li>Learn the workflow in order. If you know the order, you can answer most “how did you do it?” questions.</li>
+<li>Practise the answers aloud. Keep them simple and honest.</li>
+<li>When you do not know a number, state the idea first, then say you would check the notebook for the exact figure.</li>
+</ol>
+<div class="box"><b>The one sentence to remember:</b> We used past customer information to estimate who is most likely to leave, ranked customers by risk, and gave the retention team a safer way to decide whom to contact first.</div>
+<h3>Contents</h3>
+<ol class="toc"><li>Project story and business need</li><li>Data and what we found</li><li>End-to-end architecture and workflow</li><li>Data preparation and feature choices</li><li>Models, comparison, and final selection</li><li>Evaluation, threshold, and business value</li><li>High-risk profile, recommendations, ethics, and limitations</li><li>Viva speaking plan, questions, and model answers</li></ol>
+</section>
+
+<section>
+<h2>1. The project story — explain it first</h2>
+<h3>What problem are we solving?</h3>
+<p>A telecommunications company loses income when customers stop using its services. It cannot call every customer or give everyone a discount. The project helps the retention team <b>prioritise</b>: it estimates each customer's chance of leaving (churning), then places customers from highest risk to lowest risk.</p>
+<h3>What is churn?</h3>
+<p><b>Churn</b> means a customer leaves the company. In this project, the target column is <code>Churn</code>, with two possible values: Yes or No.</p>
+<h3>What is the machine-learning task?</h3>
+<p>It is <b>binary classification</b>. “Binary” means there are two outcomes: churn or no churn. The model produces a probability, such as 0.72 (72% estimated risk), rather than only a Yes/No label. This is useful because a manager can choose how many people to contact.</p>
+<h3>Project goal, input, output, and user</h3>
+<table><tr><th>Part</th><th>Clear explanation</th><th>Why it matters</th></tr>
+<tr><td>Goal</td><td>Find customers at higher risk of churn early enough for a retention offer.</td><td>Turns data analysis into a business action.</td></tr>
+<tr><td>Input</td><td>Customer account, service, payment, charge, and contract information.</td><td>These are the facts available before the customer leaves.</td></tr>
+<tr><td>Output</td><td>A churn-risk score, a ranked customer list, a contact threshold, and a profile of the risky group.</td><td>A score alone is not useful unless it supports a decision.</td></tr>
+<tr><td>User</td><td>The retention manager and retention agents.</td><td>The model supports people; it does not replace their judgement.</td></tr></table>
+<div class="speak"><b>30-second opening answer:</b><br>“Our project is a customer churn prediction system for a telecom company. We used information such as contract type, time with the company, services, payment method, and charges to estimate the chance that a customer will leave. The main purpose is not to make decisions automatically. It is to help the retention team contact the highest-risk customers first and test suitable offers.”</div>
+</section>
+
+<section>
+<h2>2. Dataset and key findings</h2>
+<h3>What data did we use?</h3>
+<p>We used the public IBM Telco Customer Churn dataset. It contains <b>7,043 customer records</b> and <b>21 columns</b>. One row represents one customer at one point in time. It is a public sample, not a real company’s live data.</p>
+<table><tr><th>Group of columns</th><th>Examples</th><th>Why useful</th></tr>
+<tr><td>Customer/account</td><td>tenure, contract, payment method, paperless billing</td><td>Shows the customer's relationship with the company.</td></tr>
+<tr><td>Services</td><td>internet service, phone, online security, tech support</td><td>Shows what the customer receives.</td></tr>
+<tr><td>Charges</td><td>MonthlyCharges, TotalCharges</td><td>Shows cost and length of billing history.</td></tr>
+<tr><td>Demographics</td><td>SeniorCitizen, gender, partner, dependents</td><td>Can reveal patterns, but needs care because some fields can create fairness concerns.</td></tr>
+<tr><td>Target</td><td>Churn</td><td>The answer the model learns to predict.</td></tr></table>
+<h3>Important data-quality checks</h3>
+<ul><li>There were <b>no duplicate rows</b> and no duplicate customer IDs.</li><li><code>TotalCharges</code> was stored as text, although it should be a number.</li><li>It had <b>11 blank values</b>. All were customers with tenure = 0, meaning they were new and had not yet been billed. We changed these blanks to 0.</li><li>We removed <code>customerID</code> because an ID is only a label; it should not determine churn risk.</li></ul>
+<div class="box warn"><b>Good viva wording:</b> “We did not simply fill missing values without checking. We found that all 11 blank TotalCharges records belonged to customers with zero months of tenure. Therefore, zero was a sensible value because no billing time had passed.”</div>
+<h3>Exploratory findings — associations, not causes</h3>
+<table><tr><th>Finding</th><th>Observed churn rate</th><th>Meaning</th></tr>
+<tr><td>Overall dataset</td><td>26.5%</td><td>About one in four customers churned. The classes are not equal.</td></tr>
+<tr><td>Month-to-month contract</td><td>42.7%</td><td>Flexible-contract customers were more likely to leave in this dataset.</td></tr>
+<tr><td>Fibre-optic service</td><td>42.1%</td><td>This group showed higher observed churn; it does not prove fibre service causes churn.</td></tr>
+<tr><td>Electronic check</td><td>45.7%</td><td>Payment method was associated with churn.</td></tr>
+<tr><td>0–12 months tenure</td><td>47.3%</td><td>Newer customers had much higher observed churn.</td></tr>
+<tr><td>49–72 months tenure</td><td>9.9%</td><td>Longer-standing customers were more stable in this sample.</td></tr></table>
+</section>
+
+<section class="pagebreak">
+<h2>3. Architecture and full workflow</h2>
+<p>This is the system design. The central protection is that the test data stays separate until the very end.</p>
+<div class="flow"><div><b>Raw data</b>7,043 customers</div><i>→</i><div><b>Quality checks</b>types, blanks, duplicates</div><i>→</i><div><b>80/20 split</b>training / untouched test</div><i>→</i><div><b>Pipeline</b>clean, encode, scale</div><i>→</i><div><b>Models + CV</b>compare and tune</div><i>→</i><div><b>Final evaluation</b>test once</div><i>→</i><div><b>Risk list</b>threshold / top 20%</div></div>
+<h3>Step-by-step, including why it is important</h3>
+<table><tr><th>Step</th><th>What we did</th><th>Why it is important</th></tr>
+<tr><td>1. Understand data</td><td>Checked columns, meaning, data types, duplicates, blanks, and target balance.</td><td>Bad input leads to unreliable results.</td></tr>
+<tr><td>2. Split data</td><td>Created a stratified 80/20 split: 5,634 training and 1,409 test customers.</td><td>The test set gives an honest final check on unseen data.</td></tr>
+<tr><td>3. Explore patterns</td><td>Studied churn patterns, mainly using training data after the split.</td><td>Builds business understanding without contaminating the test result.</td></tr>
+<tr><td>4. Prepare data</td><td>Converted types, simplified categories, encoded text categories, and scaled numbers for models that need it.</td><td>Models need consistent numerical input.</td></tr>
+<tr><td>5. Engineer features</td><td>Tested add-on count, automatic payment, and a charges-gap feature.</td><td>Tests whether simple new information improves prediction.</td></tr>
+<tr><td>6. Compare models</td><td>Used five-fold stratified cross-validation for baseline and candidate models.</td><td>Avoids judging a model from one lucky data split.</td></tr>
+<tr><td>7. Tune fairly</td><td>Used random search inside nested cross-validation.</td><td>Prevents tuning choices from giving an over-optimistic score.</td></tr>
+<tr><td>8. Test once</td><td>Evaluated the chosen model only once on the held-out test set.</td><td>Gives the closest estimate of future performance available in this project.</td></tr>
+<tr><td>9. Choose action rule</td><td>Selected a threshold from training predictions using stated campaign assumptions.</td><td>Converts scores into a practical contact decision.</td></tr></table>
+<h3>Key words in plain English</h3>
+<table><tr><th>Term</th><th>Simple meaning</th></tr>
+<tr><td>Stratified split</td><td>Both training and test sets keep roughly the same churn percentage as the full data.</td></tr>
+<tr><td>Data leakage</td><td>Information from the test set or future accidentally helps the model during training. It makes results look better than they really are.</td></tr>
+<tr><td>Pipeline</td><td>One controlled chain that applies the same preparation steps correctly during training and prediction.</td></tr>
+<tr><td>Cross-validation</td><td>Repeatedly trains on part of the training data and checks on the remaining part, then rotates the checked portion.</td></tr>
+<tr><td>Nested cross-validation</td><td>One loop chooses settings; a separate outer loop checks the result. This is a fairer way to report a tuned model.</td></tr></table>
+</section>
+
+<section>
+<h2>4. Preparation and feature engineering</h2>
+<h3>Why did we encode categorical values?</h3>
+<p>Models cannot directly calculate with words such as “Month-to-month” or “Fibre optic.” We used <b>one-hot encoding</b>: it creates a simple 0/1 indicator for each category. For example, a customer can have <code>Contract_Month-to-month = 1</code> and the other contract indicators = 0. We used <code>handle_unknown=ignore</code>, so an unexpected category in later data does not crash the system.</p>
+<h3>Why did we scale numerical values?</h3>
+<p>Scaling puts numbers like tenure and monthly charge onto a comparable range. It was applied only to models that are sensitive to scale, such as Logistic Regression. Tree-based models do not require it because they split values using cut-off points.</p>
+<h3>What features did we test?</h3>
+<table><tr><th>Choice</th><th>Decision</th><th>Reason</th></tr>
+<tr><td>Number of add-ons</td><td>Kept</td><td>It added useful predictive information.</td></tr>
+<tr><td>Automatic payment</td><td>Tested, not retained as a special engineered feature</td><td>It did not add enough beyond the existing payment data.</td></tr>
+<tr><td>Expected-versus-observed charges gap</td><td>Tested, not retained</td><td>It did not improve the main metric enough.</td></tr>
+<tr><td>Gender</td><td>Removed</td><td>It did not add measurable predictive value, so keeping it was unnecessary.</td></tr>
+<tr><td>Class weighting</td><td>Tested, not used</td><td>It did not improve our primary metric, PR-AUC.</td></tr></table>
+<div class="box"><b>Why test and remove features?</b> More features are not automatically better. Unhelpful fields can add noise, complexity, privacy concerns, or unfairness risk. We kept only changes that had evidence of value.</div>
+</section>
+
+<section>
+<h2>5. Models: what we tried and why Logistic Regression won</h2>
+<h3>The candidates</h3>
+<table><tr><th>Model</th><th>What it does simply</th><th>Why included</th><th>Initial PR-AUC</th></tr>
+<tr><td>Dummy classifier</td><td>Always predicts the most common class: no churn.</td><td>Sets the minimum benchmark; any useful model must beat it.</td><td>0.265</td></tr>
+<tr><td>Logistic Regression</td><td>Combines input signals to estimate a probability of churn.</td><td>Simple, fast, stable, and easier to explain.</td><td>0.661</td></tr>
+<tr><td>Decision Tree</td><td>Uses a sequence of if/then questions.</td><td>Easy to visualise, can capture simple non-linear patterns.</td><td>0.613</td></tr>
+<tr><td>Random Forest</td><td>Combines many decision trees.</td><td>Can capture more complex relationships and reduce dependence on one tree.</td><td>0.658</td></tr>
+<tr><td>HistGradientBoosting</td><td>Builds many small trees in sequence, each improving earlier errors.</td><td>A strong modern tree-based comparison model.</td><td>0.644</td></tr></table>
+<h3>How did we compare them fairly?</h3>
+<p>All candidates used the same training data, preprocessing logic, and <b>five-fold stratified cross-validation</b>. We then tuned the four real models using <b>RandomizedSearchCV</b> inside nested cross-validation. Random search tries a sensible sample of settings rather than every possible combination; this is more efficient than an exhaustive grid when there are many settings.</p>
+<h3>Why not choose the highest-scoring Random Forest?</h3>
+<p>After tuning, Random Forest had the highest nested cross-validation PR-AUC: <b>0.664 ± 0.019</b>. Logistic Regression scored <b>0.661 ± 0.019</b>. The difference was very small and within one standard error, meaning the observed advantage was not strong enough to justify the extra complexity. Our pre-defined rule was to choose the simplest model that performs comparably. Therefore, we selected <b>Logistic Regression</b>, tuned with <b>C = 4.5706</b>.</p>
+<div class="speak"><b>Strong evaluator answer:</b><br>“We did not choose Logistic Regression because it had the absolute highest score. Random Forest was slightly higher, but the difference was within normal variation. Since Logistic Regression was statistically comparable, easier to explain, faster to maintain, and sufficient for the business goal, it was the more responsible choice.”</div>
+<h3>What does C = 4.5706 mean?</h3>
+<p><b>C</b> controls how strongly Logistic Regression limits overly large influence from individual inputs. It is selected during tuning. You do not need to call it “the best number”; say it is the value that performed best among the values tested within the training process.</p>
+</section>
+
+<section class="pagebreak">
+<h2>6. Evaluation: prove the model is useful</h2>
+<h3>Why did we not use accuracy as the main measure?</h3>
+<p>Only 26.5% of customers churned. A useless model that predicts “no churn” for every customer would still be about <b>73.5% accurate</b>. It would miss every churner. Therefore, accuracy would give a misleadingly good picture.</p>
+<table><tr><th>Measure</th><th>Plain meaning</th><th>Our test result</th><th>Why it matters</th></tr>
+<tr><td>ROC-AUC</td><td>How well the model ranks a random churner above a random non-churner across all thresholds. 0.5 is random; 1.0 is perfect.</td><td><b>0.842</b></td><td>Shows strong overall ranking ability.</td></tr>
+<tr><td>PR-AUC</td><td>How well the model balances finding churners with avoiding too many wrong alerts.</td><td><b>0.631</b></td><td>More informative than accuracy when churners are the smaller group. Baseline is 0.265.</td></tr>
+<tr><td>F1 at 0.50</td><td>A balance of precision and recall at the usual 0.50 cut-off.</td><td><b>0.607</b></td><td>A reference result, not necessarily the best business policy.</td></tr>
+<tr><td>Brier score</td><td>How close predicted probabilities are to actual outcomes; lower is better.</td><td><b>0.138</b></td><td>Checks whether risk probabilities are reasonably sensible.</td></tr></table>
+<h3>Precision and recall without confusion</h3>
+<ul><li><b>Precision:</b> Of customers we flagged, what percentage truly churned? High precision means fewer unnecessary contacts.</li><li><b>Recall:</b> Of customers who truly churned, what percentage did we flag? High recall means we miss fewer likely churners.</li><li><b>Trade-off:</b> Lowering the threshold flags more people. Recall rises, but precision normally falls.</li></ul>
+<h3>Why is the selected threshold only 0.07?</h3>
+<p>A threshold is the action cut-off. At 0.50, we would contact only customers whose estimated risk is at least 50%. But a 50% cut-off is not a business law. We chose <b>0.07</b> using out-of-fold training predictions and explicit campaign assumptions:</p>
+<ul><li>Offer cost = 20 per contacted customer.</li><li>30% of contacted churners can be saved.</li><li>The value of saving a customer = 12 months of that customer's monthly charge.</li></ul>
+<p>Under those assumptions, 0.07 had the highest expected net benefit. On the untouched test set, it produced <b>37.9% precision</b>, <b>97.3% recall</b>, and flagged <b>68.1%</b> of customers. This is deliberately broad: it is appropriate only when contact is low-risk and the stated assumptions are believable.</p>
+<div class="box warn"><b>Never overclaim:</b> The threshold is not “universally best.” It is best only under our assumed offer cost, save rate, and retained value. If the company has limited capacity, we recommend a narrower top-risk list.</div>
+<h3>Capacity-based option: top 20%</h3>
+<p>If staff can contact only 20% of the test customers, they would contact <b>282 people</b>, reach <b>187 observed churners</b>, and have <b>66.3% precision</b>. This is often easier to use operationally than a fixed probability threshold.</p>
+</section>
+
+<section>
+<h2>7. High-risk profile, recommendation, and responsible use</h2>
+<h3>What did the flagged group look like?</h3>
+<table><tr><th>Characteristic at threshold 0.07</th><th>Flagged customers</th><th>Not flagged</th></tr>
+<tr><td>Observed churn rate</td><td>37.9%</td><td>2.2%</td></tr>
+<tr><td>Median tenure</td><td>16 months</td><td>57 months</td></tr>
+<tr><td>Month-to-month contract</td><td>78.1%</td><td>5.1%</td></tr>
+<tr><td>Fibre-optic service</td><td>58.5%</td><td>11.4%</td></tr></table>
+<p>Permutation importance also identified tenure, internet service, monthly charges, and contract as the strongest predictors. This tells us what the model relies on for prediction. It does <b>not</b> prove that changing one of these causes a customer to stay.</p>
+<h3>Business recommendation</h3>
+<ol><li>Use the score to prioritise outreach, starting with a capacity-appropriate group such as top 10% or top 20%.</li><li>Review service and price experience for higher-risk fibre-optic customers.</li><li>Engage newer customers early, especially those on flexible contracts.</li><li>Offer contract or payment-method changes only when they fit the customer’s needs.</li><li>Run an A/B test before large-scale rollout: compare contacted high-risk customers with similar high-risk customers who are not contacted.</li></ol>
+<h3>Why is the A/B test essential?</h3>
+<p>Our model predicts who may leave. It does not prove that a discount, call, or contract change will stop them from leaving. An A/B test measures the <b>extra retention caused by the offer</b>, rather than confusing the offer’s effect with normal customer behaviour.</p>
+<h3>Ethics and fairness</h3>
+<ul><li>The model should support a staff member, not make automatic harmful decisions.</li><li>It must never be used to deny service or penalise customers.</li><li>Gender was removed because it did not improve performance.</li><li>SeniorCitizen is age-related and needs monitoring. In the test set, 85.6% of senior customers were flagged versus 64.9% of non-senior customers. This may be a real risk difference, a data issue, or unfairness; the senior group was relatively small (222 customers).</li><li>Monitor flag rate, recall, false-positive rate, and actual offer outcomes for relevant groups using real operating data.</li><li>Customers should receive clear offers and be able to decline communication.</li></ul>
+<h3>Limitations you must state openly</h3>
+<ul><li>The IBM data is a public sample, not a real telecom company’s current data.</li><li>There are no dates and the churn time window is unclear, so we cannot track changing risk over time.</li><li>The dataset has no real customer lifetime value, offer response, complaint, competitor, or service-quality information.</li><li>Expected money results are scenario estimates based on assumptions, not observed business profit.</li><li>Relationships in the data are associations, not causes.</li><li>Performance can change on new data, so the model needs monitoring and retraining with real data.</li></ul>
+</section>
+
+<section class="pagebreak">
+<h2>8. A confident viva speaking plan</h2>
+<h3>Your 90-second full overview</h3>
+<div class="speak">“Our project addresses customer churn in a telecom company. Churn means a customer stops using the service. The retention team has limited time and cannot contact everyone, so our goal was to estimate each customer’s likelihood of leaving and rank customers by risk.<br><br>We used the IBM Telco dataset with 7,043 customers and 21 columns. We checked data quality, converted TotalCharges from text to numbers, and handled 11 blank values after confirming they belonged to new customers with zero tenure. We split the data into 80% training and 20% test data before preprocessing, so the final test result would be fair.<br><br>We compared Logistic Regression, Decision Tree, Random Forest, and HistGradientBoosting using cross-validation. Random Forest had a very slightly higher score, but Logistic Regression was within the same performance range and was simpler to explain and maintain, so we selected it. On the untouched test set it achieved ROC-AUC of 0.842 and PR-AUC of 0.631.<br><br>Finally, we used the scores to support retention campaigns. A low threshold of 0.07 maximised expected value under our stated assumptions, while a top-20% list is more practical when capacity is limited. The model is decision support only, and any offer must be validated with an A/B test.”</div>
+<h3>When an evaluator asks “why?” use this pattern</h3>
+<p><span class="pill">Decision</span> Say what you chose. <span class="pill">Reason</span> Say the evidence or business need. <span class="pill">Trade-off</span> Show that you understand the limitation.</p>
+<div class="answer"><b>Example:</b> “We chose PR-AUC as a main metric because churners are the smaller group. Accuracy could look high even if we missed all churners. The trade-off is that PR-AUC is less familiar, so we also reported ROC-AUC, precision, recall, F1, and calibration.”</div>
+<h3>Short rules for a strong answer</h3>
+<ul><li>Start with the conclusion, then explain it.</li><li>Say “in this dataset” rather than claiming it is true everywhere.</li><li>Say “associated with” rather than “caused by.”</li><li>Do not hide limitations; explaining them shows maturity.</li><li>If challenged about a number, explain what it means before giving it.</li></ul>
+</section>
+
+<section>
+<h2>9. Evaluator questions with clear answers</h2>
+<p class="small">Practise these as conversations, not a speech. The answers use simple English intentionally.</p>
+<div class="q">1. What is the main aim of your project?</div><div class="answer">To help a telecom retention team identify and rank customers who are more likely to leave, so the team can focus contact and offers where they may matter most.</div>
+<div class="q">2. Why is this a classification problem and not a regression problem?</div><div class="answer">The final outcome has two classes: churn or no churn. We predict the chance of the churn class. Regression is normally used when the answer is a continuous number, such as a price.</div>
+<div class="q">3. Why predict a probability instead of only Yes or No?</div><div class="answer">A probability lets the company rank customers. If it can contact only 20%, it can start with the highest scores. A simple Yes/No label does not give that flexibility.</div>
+<div class="q">4. What was the data issue with TotalCharges, and how did you handle it?</div><div class="answer">It was stored as text and had 11 blank values. We checked those records and found every one had zero tenure, so they were new customers with no charges yet. We converted the column to numeric and used zero for those records.</div>
+<div class="q">5. Why remove customerID?</div><div class="answer">It is an identifier, not a meaningful customer behaviour. Keeping it can make a model learn accidental patterns that will not work for future customers.</div>
+<div class="q">6. What is data leakage? How did you prevent it?</div><div class="answer">Leakage happens when information from the test data or future information influences training. It makes results unrealistically good. We split first, kept the test set untouched, and put transformations inside a pipeline so each training fold learned only from its own training data.</div>
+<div class="q">7. Why use a stratified 80/20 split?</div><div class="answer">Because only 26.5% churned. Stratification keeps a similar churn percentage in both sets. The 80/20 split leaves enough data to learn while reserving 1,409 customers for an unbiased final test.</div>
+<div class="q">8. What is one-hot encoding and why did you need it?</div><div class="answer">It changes category words into 0/1 columns that a model can use. For example, a month-to-month contract becomes an indicator. We needed it because models cannot calculate directly with text labels.</div>
+<div class="q">9. Why did you scale numerical data?</div><div class="answer">Logistic Regression is affected by very different number ranges. Scaling helps it treat numerical inputs consistently. Tree models do not need scaling, so we did it only where useful.</div>
+<div class="q">10. Why did you use a pipeline?</div><div class="answer">A pipeline keeps preparation and modelling together. It applies the same steps in the right order to training data, validation folds, and future predictions. Most importantly, it reduces leakage.</div>
+<div class="q">11. Why did you compare several models?</div><div class="answer">There is no reason to assume one model is best before testing. Logistic Regression is simple, while tree-based models can learn more complex patterns. Comparing them gives evidence for our final choice.</div>
+<div class="q">12. Why was Logistic Regression selected instead of Random Forest?</div><div class="answer">Random Forest had the highest nested cross-validation PR-AUC, 0.664, but Logistic Regression was 0.661 and within one standard error. Since the difference was tiny, we chose the simpler, more explainable model. It gave strong test results without unnecessary complexity.</div>
+<div class="q">13. Why did you use cross-validation?</div><div class="answer">A single validation split can be lucky or unlucky. Five-fold cross-validation repeats the check across different parts of the training data, so the comparison is more reliable.</div>
+<div class="q">14. What is nested cross-validation?</div><div class="answer">It separates model-setting selection from performance checking. The inner process selects settings, while the outer process checks them on unseen training folds. This gives a fairer estimate for tuned models.</div>
+<div class="q">15. Why is accuracy not your main metric?</div><div class="answer">Because most customers did not churn. A model that says “no churn” to everyone would be 73.5% accurate but would find no churners. We used PR-AUC and ROC-AUC, then checked precision and recall for the campaign decision.</div>
+<div class="q">16. Explain ROC-AUC of 0.842 in simple terms.</div><div class="answer">It means the model is good at ranking churners above non-churners across many possible cut-offs. It is much better than random ranking, which would be 0.5. It is not 84.2% accuracy.</div>
+<div class="q">17. Explain PR-AUC of 0.631 in simple terms.</div><div class="answer">It measures how well the model finds churners while avoiding too many wrong alerts. Our starting churn rate was 0.265, so 0.631 shows a meaningful improvement over the no-skill baseline.</div>
+<div class="q">18. Why is your threshold 0.07 rather than 0.50?</div><div class="answer">0.50 is only a common default, not a business rule. We selected 0.07 because it gave the highest expected benefit using our stated offer cost, save rate, and customer value assumptions. It is a broad policy with high recall, so it must be changed if those assumptions or campaign capacity change.</div>
+<div class="q">19. What happens when you lower the threshold?</div><div class="answer">We flag more customers. This helps us find more actual churners, so recall rises, but it also creates more false alerts, so precision usually falls.</div>
+<div class="q">20. What does the top-20% policy mean?</div><div class="answer">We sort customers by predicted risk and contact only the highest 20%. In the test set that was 282 customers, and 187 of them actually churned, giving 66.3% precision. It is useful when the campaign has limited capacity.</div>
+<div class="q">21. Which factors were most important?</div><div class="answer">Tenure, internet service, monthly charges, and contract were strongest. High-risk customers were often newer and on month-to-month contracts. These are prediction patterns, not proof that one factor causes churn.</div>
+<div class="q">22. Can you say fibre optic causes churn?</div><div class="answer">No. The data shows an association only. There may be other reasons, such as price, experience, or customer type. To test causes, we need controlled experiments or stronger causal research.</div>
+<div class="q">23. How would you improve the project with real company data?</div><div class="answer">I would add dates, customer contact history, complaints, service quality, offer response, real retention value, and real campaign cost. I would validate over time, monitor performance and fairness, and run A/B tests for offers.</div>
+<div class="q">24. What are the ethical risks?</div><div class="answer">The model can make unnecessary contact more likely for some people and may treat groups differently. It should never deny service or make a harmful automatic decision. We removed gender because it added no value and would monitor outcomes by relevant groups, especially the age-related senior-citizen field.</div>
+<div class="q">25. What is the biggest limitation of your business-value result?</div><div class="answer">The money result is based on assumptions: offer cost of 20, 30% save rate, and 12 months of monthly charges as value. It is a planning scenario, not observed profit. A real company must replace those assumptions with measured results.</div>
+<div class="q">26. If your test performance drops after deployment, what would you do?</div><div class="answer">First check data quality and whether customer behaviour has changed. Then compare current results with the original baseline, review fairness, recalibrate the threshold, and retrain only after using recent labelled data and validating it properly.</div>
+</section>
+
+<section class="pagebreak">
+<h2>10. Final quick-revision sheet</h2>
+<table><tr><th>Item</th><th>Remember this</th></tr>
+<tr><td>Business problem</td><td>Prioritise retention outreach for customers likely to churn.</td></tr>
+<tr><td>Dataset</td><td>IBM Telco; 7,043 customers; 21 columns.</td></tr>
+<tr><td>Target</td><td>Churn: Yes/No.</td></tr>
+<tr><td>Task</td><td>Binary classification producing a churn probability.</td></tr>
+<tr><td>Split</td><td>Stratified 80/20: 5,634 train; 1,409 untouched test.</td></tr>
+<tr><td>Data fix</td><td>11 blank TotalCharges values; all zero tenure; changed to 0 after checking.</td></tr>
+<tr><td>Preprocessing</td><td>Drop ID; simplify categories; one-hot encode; scale numerical values for scale-sensitive models; use pipeline.</td></tr>
+<tr><td>Candidate models</td><td>Dummy, Logistic Regression, Decision Tree, Random Forest, HistGradientBoosting.</td></tr>
+<tr><td>Model selection</td><td>Logistic Regression, C = 4.5706; simplest model within one standard error of best PR-AUC.</td></tr>
+<tr><td>Test scores</td><td>ROC-AUC 0.842; PR-AUC 0.631; F1 at 0.50 = 0.607; Brier = 0.138.</td></tr>
+<tr><td>Threshold</td><td>0.07 under stated assumptions; precision 37.9%, recall 97.3%, flags 68.1%.</td></tr>
+<tr><td>Capacity choice</td><td>Top 20%: 282 contacted, 187 churners reached, 66.3% precision.</td></tr>
+<tr><td>Main message</td><td>Decision support, not automatic action; test offers using an A/B experiment.</td></tr></table>
+<div class="box"><b>Last-minute checklist before your viva:</b><br>Can you explain churn, binary classification, leakage, pipeline, cross-validation, PR-AUC, precision, recall, threshold, why Logistic Regression was chosen, one limitation, and why an A/B test is needed? If yes, you are ready for the core discussion.</div>
+<p class="footer-note">Source basis: group final report, final notebook, evaluation results, high-risk profiling, and project demo material. Values are project-specific and must be described as results from the IBM sample dataset.</p>
+</section>
+</body></html>
